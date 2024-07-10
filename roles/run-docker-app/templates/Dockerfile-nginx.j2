@@ -1,0 +1,4 @@
+FROM nginx:1.27
+WORKDIR "{{ app_path }}"
+COPY "./*.php" .
+ENTRYPOINT ["nginx", "-g", "daemon off;"]

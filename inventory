@@ -1,0 +1,4 @@
+[vms]
+server ansible_ssh_user=alex ansible_host=192.168.1.102 ansible_password=123456
+[all:vars]
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'

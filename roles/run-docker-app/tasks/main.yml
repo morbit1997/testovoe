@@ -1,0 +1,67 @@
+---
+# tasks file for run-docker-app
+- name: "Setup workdir"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "/opt/myapp_docker"
+    - "/opt/myapp_docker/conf.d"
+
+- name: "Copy files"
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ workdir }}"
+  with_fileglob:
+  - "{{ role_path }}/files/*"
+  - "{{ role_path }}/files/.*"
+
+- name: "Generate nginx config file"
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/myapp.conf.j2"
+    dest: "{{ workdir }}/conf.d/myapp.conf"
+  notify: "reload nginx"
+
+- name: "Generate Nginx dockerfile"
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/Dockerfile-nginx.j2"
+    dest: "{{ workdir }}/Dockerfile-nginx"
+
+- name: "Generate php dockerfile"
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/Dockerfile-php.j2"
+    dest: "{{ workdir }}/Dockerfile-php"
+# Тут я наделал разных проверок, но наверно они не нужны
+#- name: "Check if app running"
+#  ansible.builtin.command: docker compose ps
+#  args:
+#    chdir: "{{ workdir }}"
+#  register: compose_status
+
+#- name: "Check containter status"
+# ansible.builtin.assert:
+#    that:
+#      - compose_status.rc == 0
+#      - "compose_status.stdout.find('Up') != -1"
+#    fail_msg: "Containers is not running"
+#    success_msg: "Containers is running"
+#  register: result
+# ignore_errors: yes
+
+#- name: "Container count"
+#  ansible.builtin.set_fact:
+#    up_containers: "{{ compose_status.stdout.splitlines() | select('search', 'Up') | list | length }}"
+#- name: "All containers is up"
+#  ansible.builtin.assert:
+#    that:
+#      - up_containers | int == 3
+#    fail_msg: "Не все контейнеры запущены"
+#  register: count_check
+#  ignore_errors: yes
+
+- name: "Run app"
+  ansible.builtin.shell:
+    chdir: "{{ workdir }}"
+    cmd: docker compose up -d
+  #when: result.failed is true or count_check.failed is true

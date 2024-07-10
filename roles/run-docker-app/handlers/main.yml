@@ -1,0 +1,13 @@
+---
+# handlers file for run-docker-app
+- name: "Test config"
+  ansible.builtin.shell:
+    chdir: "{{ workdir }}"
+    cmd: docker exec -it nginx nginx -t
+  listen: "reload nginx"
+
+- name: "Reload nginx"
+  ansible.builtin.shell:
+    chdir: "{{ workdir }}"
+    cmd: docker exec -it nginx nginx -s reload
+  listen: "reload nginx"

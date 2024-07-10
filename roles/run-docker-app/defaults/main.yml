@@ -1,0 +1,6 @@
+---
+# defaults file for run-docker-app
+http_port: 80
+app_path: "/var/www/myapp"
+workdir: "/opt/myapp_docker"
+server_name: "myapp"
